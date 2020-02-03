@@ -1,0 +1,25 @@
+header {
+	text-align: center;
+	padding-bottom: 1em;
+}
+div.group {
+	margin: 0em 1em;
+}
+h3 {
+	text-align: center;
+	margin: 0.5em 0 1em 0;
+}
+a.button {
+	width: 100%;
+	text-align: center;
+	text-transform: none;
+	font-weight: bold;
+}
+a.button--outlined:focus, a.button--outlined:hover {
+	background-color: #ccc !important;
+	color: black !important;
+}
+div.card {
+	margin-top: 1em;
+	margin-bottom: 0em;
+}

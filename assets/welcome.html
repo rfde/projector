@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Welcome View | Projector</title>
+		<script src="js/qrcodejs/qrcode.min.js"></script>
+		<style type="text/css">
+			html {
+				height: 100%;
+			}
+			body {
+				height: 100%;
+				cursor: none;
+				background-color: black;
+				margin: 0 !important;
+				padding: 0 !important;
+				overflow: hidden;
+				color: white;
+				background-image: url('img/testbild.svg');
+				background-size: cover;
+			}
+			div.centerbox {
+				height: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			div.center-inner {
+				background-color: #ccc;
+				border-radius: 25px;
+				padding: 1em 3em;
+				filter: drop-shadow(0 0 2em black);
+			}
+			div.center-inner > p {
+				width: 100%;
+				text-align: center;
+			}
+			span#url-text {
+				color: black;
+				font-size: 8em;
+				font-family: monospace;
+				word-break: break-all;
+			}
+			div#qrcode {
+				margin-left: auto;
+				margin-right: auto;
+				width: 500px;
+				padding: 30px;
+				background: white;
+				background-clip: padding-box;
+			}
+		</style>
+		<script type="text/javascript">
+			function setIpAndPort(ip, port) {
+				if (ip == "") {
+					setTimeout(function(){
+						window.location.reload();
+					}, 5000);
+				
+					var image = document.createElement("img");
+					image.setAttribute("src", "/assets/img/network.gif");
+					image.setAttribute("width", 500);
+					document.getElementById("qrcode").appendChild(image);
+				} else {
+					var hostAndPort = ip + ":" + parseInt(port);
+					var qrcode = new QRCode(document.getElementById("qrcode"), {
+						text:  "http://" + hostAndPort + "/ctrl",
+						width: 500,
+						height: 500,
+						colorDark : "#000000",
+						colorLight : "#ffffff",
+						correctLevel : QRCode.CorrectLevel.H
+					});
+					document.getElementById("url-text").innerText = hostAndPort + "/ctrl";
+				}
+			}
+		</script>
+	</head>
+	<body onload="initWelcome()">
+		<div class="centerbox">
+			<div class="center-inner">
+				<p><div id="qrcode"></div></p>
+				<br />
+				<p><span id="url-text"></span></p>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Marquee View | Projector</title>
+		<style type="text/css">
+			html {
+				height: 100%;
+			}
+			body {
+				cursor: none;
+				background-color: black;
+				margin: 0 !important;
+				padding: 0 !important;
+				overflow: hidden;
+				color: #ff9900;
+				height: 100%;
+			}
+			.container {
+				height: 100%;
+			    display: flex;
+			    align-items: center;
+			    justify-content: center;
+			}
+			div.marquee-container {
+				width: 100%;
+				white-space: nowrap;
+				overflow: hidden;
+			}
+			span.marquee-text {
+				display: inline-block;
+				padding-left:100%;
+				animation: marquee 10s linear infinite;
+				font-weight: bold;
+				font-family: sans-serif;
+				font-size: 40em;
+				visibility: hidden;
+			}
+			@keyframes marquee {
+				0% { 
+					transform: translateX(0%);
+				}
+				100% { 
+					transform: translateX(-100%);
+				}
+			}
+		</style>
+		<script type="text/javascript">
+			function setupMarquee(text, speed) {
+				var spanSelector = document.getElementById('text');
+				spanSelector.innerText = text;
+				var spanLength = spanSelector.offsetWidth;
+				var timeTaken = spanLength / speed;
+				spanSelector.style.animationDuration = timeTaken + "s";
+				spanSelector.style.visibility = "visible";
+			}
+		</script>
+	</head>
+	<body onload="initMarquee()">
+		<div class="container">
+			<div class="marquee-container">
+				<span class="marquee-text" id="text">
+					
+				</span>
+			</div>
+		</div>
+	</body>
+</html>
+<!-- https://stackoverflow.com/questions/38118002/css-marquee-speed -->
+<!-- https://webdesign.weisshart.de/marquee.php -->

@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Image View | Projector</title>
+		<style type="text/css">
+			html {
+				height: 100%;
+			}
+			body {
+				height: 100%;
+				cursor: none;
+				background-color: white;
+				margin: 0 !important;
+				padding: 0 !important;
+				overflow: hidden;
+				color: white;
+				background-size: cover;
+			}
+		</style>
+        <script type="text/javascript">
+			function setupImage(filename) {
+				document.body.style.backgroundImage = "url('/conf/" + filename + "')";
+			}
+		</script>
+	</head>
+	<body onload="initImage()">
+	</body>
+</html>
