@@ -60,7 +60,7 @@ Please be aware that I created this program essentialy on a single Saturday even
   ```
   $ go get github.com/rfde/projector
   ```
-* Change into the cloned directory (adjust if your `$GOPATH` is different):
+* Change into the cloned directory (adjust if your `GOPATH` is different):
 
   ```
   $ cd ~/go/src/github.com/rfde/projector
