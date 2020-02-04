@@ -18,13 +18,13 @@ For more information on how to write a configuration, have a look at the [README
 ## Currently supported **Element** types
 
 * `video`
-  * Parameter: Path to a video file relative to the `config` directory.
+  * Parameter: Path to a video file relative to the `conf` directory.
   * Presents a video file. When the video has finished, it stops on the last frame.
 * `video-loop`
-  * Parameter: Path to a video file relative to the `config` directory.
+  * Parameter: Path to a video file relative to the `conf` directory.
   * Same as `video`, but repeats the video after playback has finished.
 * `image`
-  * Parameter: Path to an image file relative to the `config` directory.
+  * Parameter: Path to an image file relative to the `conf` directory.
   * Presents an image file.
 * `marquee`
   * Parameter: Text
