@@ -6,7 +6,9 @@
 		<title>Projector JSON Editor</title>
 		<style type="text/css">
 			body {
-				font-family: sans-serif;
+				font-family: "Helvetica", sans-serif;
+				max-width: 800px;
+				margin: auto;
 			}
 			textarea.ta_json {
 				width: 100%;
@@ -28,6 +30,15 @@
 				background-color: #f7d9b4;
 				border: 1px solid red;
 			}
+			div#tree > ul > li.color_primary {
+				background-color: #dbefff;
+			}
+			div#tree > ul > li.color_secondary {
+				background-color: #dbffde;
+			}
+			div#tree > ul > li.color_tertiary {
+				background-color: #fff8db;
+			}
 			ul.color_primary {
 				border: 1px solid blue;
 			}
@@ -37,6 +48,10 @@
 			ul.color_tertiary {
 				border: 1px solid red;
 			}
+			div#tree ul {
+				list-style: none;
+				padding: 0;
+			}
 			.hidden {
 				display: none;
 			}
@@ -45,6 +60,20 @@
 			}
 			.floatr {
 				float: right;
+			}
+			.alignr {
+				text-align: right;
+			}
+			label {
+				min-width: 6em;
+				display: inline-block;
+			}
+			hr{
+				border: none;
+				border-top: 1px solid black;
+			}
+			h3 {
+				border-bottom: 1px solid #888;
 			}
 		</style>
 		<script type="text/javascript">
@@ -164,6 +193,8 @@
 				label_name.innerText = "Label: ";
 				var input_name = document.createElement("input");
 				input_name.value = jsondata["Name"];
+				input_name.id = "name_" + id;
+				label_name.htmlFor = "name_" + id;
 				input_name.classList.add("inpName");
 				
 				var label_color = document.createElement("label");
@@ -177,6 +208,7 @@
 				}
 				input_color.value = jsondata["Color"];
 				input_color.id = "color_" + id;
+				label_color.htmlFor = "color_" + id;
 				input_color.onchange = function(){
 					var new_color = document.getElementById("color_" + id).value;
 					root.classList.remove("color_primary");
@@ -184,11 +216,12 @@
 					root.classList.remove("color_tertiary");
 					root.classList.add("color_" + new_color);
 				};
+
 				root.appendChild(label_name);
-				label_name.appendChild(input_name);
+				root.appendChild(input_name);
 				root.appendChild(document.createElement("br"));
 				root.appendChild(label_color);
-				label_color.appendChild(input_color);
+				root.appendChild(input_color);
 			}
 			function build_element(jsondata, root) {
 				var id = Math.random().toString(16);
@@ -259,6 +292,7 @@
 				}
 				input_endpoint.value = jsondata["Endpoint"];
 				input_endpoint.id = "endpoint_" + id;
+				label_endpoint.htmlFor = "endpoint_" + id;
 				input_endpoint.classList.add("inpEndpoint");
 				input_endpoint.onchange = function(){
 					var new_endpoint = document.getElementById("endpoint_" + id).value;
@@ -276,6 +310,7 @@
 				var input_parameter = document.createElement("input");
 				input_parameter.value = jsondata["Parameter"];
 				input_parameter.id = "parameter_" + id;
+				label_parameter.htmlFor = "parameter_" + id;
 				input_parameter.classList.add("inpParameter");
 				if (endpoints_noparam.includes(jsondata["Endpoint"])) {
 					input_parameter.classList.add("hidden");
@@ -283,10 +318,10 @@
 
 				root.appendChild(document.createElement("br"));
 				root.appendChild(label_endpoint);
-				label_endpoint.appendChild(input_endpoint);
+				root.appendChild(input_endpoint);
 				root.appendChild(document.createElement("br"));
 				root.appendChild(label_parameter);
-				label_parameter.appendChild(input_parameter);
+				root.appendChild(input_parameter);
 				root.appendChild(document.createElement("br"));
 			}
 			function tree_to_json(root_ul_id) {
@@ -327,6 +362,12 @@
 				element.click();
 				document.body.removeChild(element);
 			}
+			function copy(root_ul_id) {
+				tree_to_json(root_ul_id);
+				var ta = document.getElementById("ta_json_output");
+				ta.select();
+				document.execCommand("copy");
+			}
 			function dropfile(file) {
 				var reader = new FileReader();
 				reader.onload = function(e) {
@@ -334,7 +375,6 @@
 				};
 				reader.readAsText(file, "UTF-8");
 			}
-
 			function ta_dropfile(e) {
 				e.preventDefault();
 				var file = e.dataTransfer.files[0];
@@ -344,7 +384,7 @@
 	</head>
 	<body>
 		<div class="section" id="section_input">
-			<h2>Neu/Laden</h2>
+			<h3>Neu/Laden</h3>
 			<div>	
 				<button onclick="new_tree()">Mit leerer Konfiguration starten</button>
 				<br/>
@@ -359,29 +399,30 @@
 			</div>
 		</div>
 		<div class="section hidden" id="section_editor">
-			<h2>Editor</h4>
-			<strong>Farben:</strong>
+			<p class="alignr"><button onclick="location.reload();">Zurück (andere Konfiguration laden)</button></p>
+			<h3>Editor</h3>
+			<div id="tree">
+			</div>
+
+			<h3>Ausgabe</h3>
+			<p>
+				<button onclick="tree_to_json('tree');">Aktualisieren</button>
+				<span class="floatr">
+					<button onclick="copy('tree');">Aktualisieren und kopieren</button>
+					<button onclick="save_to_file('tree');">Aktualisieren und herunterladen</button>
+				</span>
+			</p>
+			<textarea readonly id="ta_json_output" class="ta_json ta_json_output" onclick="this.focus();this.select();"></textarea>
+
+			<h3>Funktionen</h3>
 			<ul>
-				<li class="text_primary"><strong>primary:</strong> Blau</li>
-				<li class="text_secondary"><strong>secondary:</strong> Grün</li>
-				<li class="text_tertiary"><strong>tertiary:</strong> Orange</li>
-			</ul>
-			<strong>Funktionen:</strong>
-			<ul>
-				<li><strong>video:</strong> Zeigt ein Video an. Bleibt auf dem letzten Frame stehen.<br>Parameter: Relativer Pfad zur Videodatei.</li>
-				<li><strong>video-loop:</strong> Zeigt ein Video in Dauerschleife an.<br>Parameter: Relativer Pfad zur Videodatei.</li>
-				<li><strong>image:</strong> Zeigt ein Bild an.<br>Parameter: Relativer Pfad zur Bilddatei.</li>
-				<li><strong>marquee:</strong> Laufschrift.<br>Parameter: Text der Laufschrift.</li>
+				<li><strong>video:</strong> Zeigt ein Video an. Bleibt auf dem letzten Frame stehen.<br><i>Parameter: Relativer Pfad zur Videodatei.</i></li>
+				<li><strong>video-loop:</strong> Zeigt ein Video in Dauerschleife an.<br><i>Parameter: Relativer Pfad zur Videodatei.</i></li>
+				<li><strong>image:</strong> Zeigt ein Bild an.<br><i>Parameter: Relativer Pfad zur Bilddatei.</i></li>
+				<li><strong>marquee:</strong> Laufschrift.<br><i>Parameter: Text der Laufschrift.</i></li>
 				<li><strong>black:</strong> Zeigt einen schwarzen Bildschirm an.<br><i>Kein Parameter.</i></li>
 				<li><strong>welcome:</strong> Zeigt den Startbildschirm (QR-Code zum Verbinden) an.<br><i>Kein Parameter.</i></li>
 			</ul>
-			<hr>
-			<div id="tree">
-			</div>
-			<h3>Ausgabe</h3>
-			<button onclick="tree_to_json('tree');">Generieren/Aktualisieren</button>
-			<button onclick="save_to_file('tree');">Als Datei speichern</button>
-			<textarea readonly id="ta_json_output" class="ta_json ta_json_output"></textarea>
 		</div>
 	</body>
 </html>
