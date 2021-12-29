@@ -1,0 +1,387 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Projector JSON Editor</title>
+		<style type="text/css">
+			body {
+				font-family: sans-serif;
+			}
+			textarea.ta_json {
+				width: 100%;
+				height: 400px;
+			}
+			li.element, li.group {
+				margin: 0.5em;
+				padding: 0.5em;
+			}
+			li.color_primary {
+				background-color: lightblue;
+				border: 1px solid blue;
+			}
+			li.color_secondary {
+				background-color: lightgreen;
+				border: 1px solid green;
+			}
+			li.color_tertiary {
+				background-color: #f7d9b4;
+				border: 1px solid red;
+			}
+			ul.color_primary {
+				border: 1px solid blue;
+			}
+			ul.color_secondary {
+				border: 1px solid green;
+			}
+			ul.color_tertiary {
+				border: 1px solid red;
+			}
+			.hidden {
+				display: none;
+			}
+			.bold {
+				font-weight: bold;
+			}
+			.floatr {
+				float: right;
+			}
+		</style>
+		<script type="text/javascript">
+			var colors = ["primary", "secondary", "tertiary"];
+			var endpoints = ["video", "video-loop", "image", "marquee", "black", "welcome"];
+			var endpoints_noparam = ["black", "welcome"];
+			
+			function hide_input_section() {
+				document.getElementById("section_input").classList.add("hidden");
+				document.getElementById("section_editor").classList.remove("hidden");
+				document.getElementById("ta_json_output").value = "";
+			}
+			function parse_json_input(ta_id) {
+				var ta = document.getElementById(ta_id);
+				var jsondata = JSON.parse(ta.value);
+				rebuild_tree(jsondata, "tree");
+				hide_input_section();
+			}
+			function new_tree() {
+				rebuild_tree([{"Name": "Gruppe 1", "Color": "primary", "Elements": []}], "tree");
+				hide_input_section();
+			}
+			function rebuild_tree(jsondata, parent_id) {
+				var parent = document.getElementById(parent_id);
+				// clear parent
+				parent.innerHTML = "";
+				// rebuild tree
+				var root_ul = document.createElement("ul");
+				parent.appendChild(root_ul);
+				for (const group of jsondata) {
+					build_group(group, root_ul);
+				}
+				
+				var btn_add_group = document.createElement("button");
+				btn_add_group.innerText = "+ (Gruppe)";
+				btn_add_group.onclick = function(){
+					build_group({"Name":"", "Color": "primary", "Elements": []}, root_ul);
+				};
+				parent.appendChild(btn_add_group);
+			}
+			function build_group(jsondata, root) {
+				var id = Math.random().toString(16);
+				var group_li = document.createElement("li");
+				group_li.id = "group_" + id;
+				group_li.classList.add("group");
+
+				var type_span = document.createElement("span");
+				type_span.innerText = "Gruppe:";
+				type_span.classList.add("bold");
+				group_li.appendChild(type_span);
+
+				var btnspan = document.createElement("span");
+				btnspan.classList.add("floatr");
+				var btn_moveup = document.createElement("button");
+				btn_moveup.innerText = "▲";
+				btn_moveup.tabIndex = -1;
+				btn_moveup.onclick = function(){
+					var group_li = document.getElementById("group_" + id);
+					var group_ul = group_li.parentNode;
+					if (group_li.previousElementSibling) {
+						group_ul.insertBefore(group_li, group_li.previousElementSibling);
+					}
+				};
+				var btn_movedown = document.createElement("button");
+				btn_movedown.innerText = "▼";
+				btn_movedown.tabIndex = -1;
+				btn_movedown.onclick = function(){
+					var group_li = document.getElementById("group_" + id);
+					var group_ul = group_li.parentNode;
+					if (group_li.nextElementSibling) {
+			    		group_ul.insertBefore(group_li.nextElementSibling, group_li);
+					}
+				};
+				var btn_del = document.createElement("button");
+				btn_del.innerText = "⨯";
+				btn_del.tabIndex = -1;
+				btn_del.onclick = function(){
+					var group_li = document.getElementById("group_" + id);
+					group_li.remove();
+				};
+				var btn_add_elem = document.createElement("button");
+				btn_add_elem.innerText = "+ (Button)";
+				btn_add_elem.onclick = function(){
+					var group_list_ul = document.getElementById("group_list_" + id);
+					var group_color = document.getElementById("color_" + id).value;
+					var element_li = document.createElement("li");
+					element_li.classList.add("element");
+					build_element({"Name":"", "Color": group_color, "Endpoint": endpoints[0], "Parameter": ""}, element_li)
+					group_list_ul.appendChild(element_li)
+				};
+				btnspan.appendChild(btn_moveup);
+				btnspan.appendChild(btn_movedown);
+				btnspan.appendChild(btn_del);
+				group_li.appendChild(btnspan);
+
+				group_li.appendChild(document.createElement("br"));
+				
+				insert_common_fields(jsondata, group_li, id);
+				
+				var group_ul = document.createElement("ul");
+				group_ul.id = "group_list_" + id;
+				// group_ul.classList.add("group");
+				group_li.classList.add("color_" + jsondata["Color"]);
+				for (const element of jsondata["Elements"]) {
+					var element_li = document.createElement("li");
+					element_li.classList.add("element");
+					// element_li.innerText = element["Name"]
+					build_element(element, element_li)
+					group_ul.appendChild(element_li);
+				}
+				group_li.appendChild(group_ul);
+				group_li.appendChild(btn_add_elem);
+				root.appendChild(group_li);
+			}
+			function insert_common_fields(jsondata, root, id) {
+				var label_name = document.createElement("label");
+				label_name.innerText = "Label: ";
+				var input_name = document.createElement("input");
+				input_name.value = jsondata["Name"];
+				input_name.classList.add("inpName");
+				
+				var label_color = document.createElement("label");
+				label_color.innerText = "Farbe: ";
+				var input_color = document.createElement("select");
+				input_color.classList.add("inpColor");
+				for (const color of colors) {
+					var optc = document.createElement("option");
+					optc.innerText = color;
+					input_color.appendChild(optc);
+				}
+				input_color.value = jsondata["Color"];
+				input_color.id = "color_" + id;
+				input_color.onchange = function(){
+					var new_color = document.getElementById("color_" + id).value;
+					root.classList.remove("color_primary");
+					root.classList.remove("color_secondary");
+					root.classList.remove("color_tertiary");
+					root.classList.add("color_" + new_color);
+				};
+				root.appendChild(label_name);
+				label_name.appendChild(input_name);
+				root.appendChild(document.createElement("br"));
+				root.appendChild(label_color);
+				label_color.appendChild(input_color);
+			}
+			function build_element(jsondata, root) {
+				var id = Math.random().toString(16);
+				root.classList.add("color_" + jsondata["Color"]);
+				root.id = "element_" + id;
+
+				var type_span = document.createElement("span");
+				type_span.innerText = "Button: ";
+				type_span.classList.add("bold");
+				root.appendChild(type_span);
+
+				var btnspan = document.createElement("span");
+				btnspan.classList.add("floatr");
+				var btn_moveup = document.createElement("button");
+				btn_moveup.innerText = "▲";
+				btn_moveup.tabIndex = -1;
+				btn_moveup.onclick = function(){
+					var element_li = document.getElementById("element_" + id);
+					var group_ul = element_li.parentNode;
+					var group_li = group_ul.parentNode;
+					if (element_li.previousElementSibling) {
+						group_ul.insertBefore(element_li, element_li.previousElementSibling);
+					} else if (group_li.previousElementSibling) {
+						var previous_group_ul = group_li.previousElementSibling.getElementsByTagName("ul");
+						previous_group_ul = previous_group_ul[previous_group_ul.length-1];
+						previous_group_ul.appendChild(element_li);
+					}
+				}
+				var btn_movedown = document.createElement("button");
+				btn_movedown.innerText = "▼";
+				btn_movedown.tabIndex = -1;
+				btn_movedown.onclick = function(){
+					var element_li = document.getElementById("element_" + id);
+					var group_ul = element_li.parentNode;
+					var group_li = group_ul.parentNode;
+					if (element_li.nextElementSibling) {
+						group_ul.insertBefore(element_li.nextElementSibling, element_li);
+					} else if (group_li.nextElementSibling) {
+						var next_group_ul = group_li.nextElementSibling.getElementsByTagName("ul")[0];
+						next_group_ul.appendChild(element_li);
+						next_group_ul.insertBefore(element_li, next_group_ul.getElementsByTagName("li")[0]);
+					}
+				}
+
+				var btn_del = document.createElement("button");
+				btn_del.innerText = "⨯";
+				btn_del.tabIndex = -1;
+				btn_del.onclick = function(){
+					var element_li = document.getElementById("element_" + id);
+					element_li.remove();
+				}
+				btnspan.appendChild(btn_moveup);
+				btnspan.appendChild(btn_movedown);
+				btnspan.appendChild(btn_del);
+				root.appendChild(btnspan);
+
+				root.appendChild(document.createElement("br"));
+
+				insert_common_fields(jsondata, root, id);
+
+				var label_endpoint = document.createElement("label");
+				label_endpoint.innerText = "Funktion: ";
+				var input_endpoint = document.createElement("select");
+				for (const endpoint of endpoints) {
+					var opte = document.createElement("option");
+					opte.innerText = endpoint;
+					input_endpoint.appendChild(opte);
+				}
+				input_endpoint.value = jsondata["Endpoint"];
+				input_endpoint.id = "endpoint_" + id;
+				input_endpoint.classList.add("inpEndpoint");
+				input_endpoint.onchange = function(){
+					var new_endpoint = document.getElementById("endpoint_" + id).value;
+					var input_parameter = document.getElementById("parameter_" + id);
+					if (endpoints_noparam.includes(new_endpoint)) {
+						input_parameter.classList.add("hidden");
+						input_parameter.value = "";
+					} else {
+						input_parameter.classList.remove("hidden");
+					}
+				};
+
+				var label_parameter = document.createElement("label");
+				label_parameter.innerText = "Parameter: ";
+				var input_parameter = document.createElement("input");
+				input_parameter.value = jsondata["Parameter"];
+				input_parameter.id = "parameter_" + id;
+				input_parameter.classList.add("inpParameter");
+				if (endpoints_noparam.includes(jsondata["Endpoint"])) {
+					input_parameter.classList.add("hidden");
+				}
+
+				root.appendChild(document.createElement("br"));
+				root.appendChild(label_endpoint);
+				label_endpoint.appendChild(input_endpoint);
+				root.appendChild(document.createElement("br"));
+				root.appendChild(label_parameter);
+				label_parameter.appendChild(input_parameter);
+				root.appendChild(document.createElement("br"));
+			}
+			function tree_to_json(root_ul_id) {
+				var root_ul = document.getElementById(root_ul_id);
+				var ta_out = document.getElementById("ta_json_output");
+				var jsondata = [];
+				for (group_li of root_ul.querySelectorAll(".group")) {
+					var gr_name = group_li.querySelectorAll(".inpName")[0].value;
+					var gr_color = group_li.querySelectorAll(".inpColor")[0].value;
+					var gr_elements = [];
+					for (element_li of group_li.getElementsByTagName("li")) {
+						var el_name = element_li.querySelectorAll(".inpName")[0].value;
+						var el_color = element_li.querySelectorAll(".inpColor")[0].value;
+						var el_endpoint = element_li.querySelectorAll(".inpEndpoint")[0].value;
+						var el_parameter = element_li.querySelectorAll(".inpParameter")[0].value;
+						gr_elements.push({
+							"Name": el_name,
+							"Color": el_color,
+							"Endpoint": el_endpoint,
+							"Parameter": el_parameter,
+						});
+					}
+					jsondata.push({
+						"Name": gr_name,
+						"Color": gr_color,
+						"Elements": gr_elements
+					});
+				}
+				ta_out.value = JSON.stringify(jsondata, null, 2);
+			}
+			function save_to_file(root_ul_id) {
+				tree_to_json(root_ul_id);
+				var element = document.createElement('a');
+				element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(document.getElementById("ta_json_output").value));
+				element.setAttribute('download', "config.json");
+				element.style.display = 'none';
+				document.body.appendChild(element);
+				element.click();
+				document.body.removeChild(element);
+			}
+			function dropfile(file) {
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					document.getElementById("ta_json_input").value = e.target.result;
+				};
+				reader.readAsText(file, "UTF-8");
+			}
+
+			function ta_dropfile(e) {
+				e.preventDefault();
+				var file = e.dataTransfer.files[0];
+				dropfile(file);
+			};
+		</script>
+	</head>
+	<body>
+		<div class="section" id="section_input">
+			<h2>Neu/Laden</h2>
+			<div>	
+				<button onclick="new_tree()">Mit leerer Konfiguration starten</button>
+				<br/>
+			</div>
+			<br>
+			<strong>oder</strong>
+			<br><br>
+			<div>
+				eine bestehende Konfiguration einlesen:<br/>
+				<textarea placeholder="Hier eine bestehende Konfiguration hineinkopieren oder eine Konfigurationsdatei per Drag-and-Drop fallen lassen" ondragover="return false;" ondragenter="return false;" ondrop="ta_dropfile(event)" id="ta_json_input" class="ta_json ta_json_input"></textarea>
+				<button onclick="parse_json_input('ta_json_input');">Einlesen</button>
+			</div>
+		</div>
+		<div class="section hidden" id="section_editor">
+			<h2>Editor</h4>
+			<strong>Farben:</strong>
+			<ul>
+				<li class="text_primary"><strong>primary:</strong> Blau</li>
+				<li class="text_secondary"><strong>secondary:</strong> Grün</li>
+				<li class="text_tertiary"><strong>tertiary:</strong> Orange</li>
+			</ul>
+			<strong>Funktionen:</strong>
+			<ul>
+				<li><strong>video:</strong> Zeigt ein Video an. Bleibt auf dem letzten Frame stehen.<br>Parameter: Relativer Pfad zur Videodatei.</li>
+				<li><strong>video-loop:</strong> Zeigt ein Video in Dauerschleife an.<br>Parameter: Relativer Pfad zur Videodatei.</li>
+				<li><strong>image:</strong> Zeigt ein Bild an.<br>Parameter: Relativer Pfad zur Bilddatei.</li>
+				<li><strong>marquee:</strong> Laufschrift.<br>Parameter: Text der Laufschrift.</li>
+				<li><strong>black:</strong> Zeigt einen schwarzen Bildschirm an.<br><i>Kein Parameter.</i></li>
+				<li><strong>welcome:</strong> Zeigt den Startbildschirm (QR-Code zum Verbinden) an.<br><i>Kein Parameter.</i></li>
+			</ul>
+			<hr>
+			<div id="tree">
+			</div>
+			<h3>Ausgabe</h3>
+			<button onclick="tree_to_json('tree');">Generieren/Aktualisieren</button>
+			<button onclick="save_to_file('tree');">Als Datei speichern</button>
+			<textarea readonly id="ta_json_output" class="ta_json ta_json_output"></textarea>
+		</div>
+	</body>
+</html>
